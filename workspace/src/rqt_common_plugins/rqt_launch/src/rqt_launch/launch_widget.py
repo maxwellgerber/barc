@@ -66,7 +66,6 @@ class LaunchWidget(QDialog):
         '''
         super(LaunchWidget, self).__init__()
         self._parent = parent
-        print 'FROM WIDGET'
 
         self._config = None
 

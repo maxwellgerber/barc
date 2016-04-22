@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
 # ---------------------------------------------------------------------------
-# Licensing Information: You are free to use or extend these projects for 
+# Licensing Information: You are free to use or extend these projects for
 # education or reserach purposes provided that (1) you retain this notice
-# and (2) you provide clear attribution to UC Berkeley, including a link 
+# and (2) you provide clear attribution to UC Berkeley, including a link
 # to http://barc-project.com
 #
 # Attibution Information: The barc project ROS code-base was developed
 # at UC Berkeley in the Model Predictive Control (MPC) lab by Jon Gonzales
 # (jon.gonzales@berkeley.edu). The cloud services integation with ROS was developed
-# by Kiet Lam  (kiet.lam@berkeley.edu). The web-server app Dator was 
+# by Kiet Lam  (kiet.lam@berkeley.edu). The web-server app Dator was
 # based on an open source project by Bruce Wootton
 # ---------------------------------------------------------------------------
 
@@ -173,6 +173,7 @@ class MyGUI(Plugin):
         self._widget.label_experiment.setText('Experiment name')
         self._widget.pushbutton_record.setText('Start Recording')
 
+
     def upload_data(self):
         print 'Uploading data!!!!'
         rosbag_file = os.path.abspath(rosbag_dir + '/' + self._widget.experiment_name.text() + '.bag')
@@ -231,8 +232,8 @@ class MyGUI(Plugin):
 
     def upload_message(self, topic, msgs, tss, experiment):
         vars_list = ['roll', 'pitch', 'yaw',
-                      'roll_rate', 'pitch_rate', 'yaw_rate',
-                     'acc_x', 'acc_y', 'acc_z', 
+                     'roll_rate', 'pitch_rate', 'yaw_rate',
+                     'acc_x', 'acc_y', 'acc_z',
                      'encoder_FL', 'encoder_FR','encoder_BL','encoder_BR',
                      'motor_pwm', 'servo_pwm',
                      'ultrasound_front','ultrasound_back','ultrasound_left','ultrasound_right']

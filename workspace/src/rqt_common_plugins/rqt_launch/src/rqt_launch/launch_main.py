@@ -62,7 +62,6 @@ def is_float(s):
 class LaunchMain(object):
     def __init__(self, plugin_context):
         super(LaunchMain, self).__init__()
-        print 'sfdfdsfsdfds'
         self._plugin_context = plugin_context
 
         self._main_launch_widget = LaunchWidget(self)
