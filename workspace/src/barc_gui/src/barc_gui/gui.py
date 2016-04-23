@@ -94,7 +94,11 @@ class MyGUI(Plugin):
 
 
         self._widget.pushbutton_record.clicked[bool].connect(self._handle_record)
+        self._widget.pushbutton_record_video.clicked[bool].connect(self._handle_record_video)
         self.record_started = False
+
+
+        self.record_video_started = False
 
         self.setup_topics_list()
         self.p = None
@@ -128,6 +132,10 @@ class MyGUI(Plugin):
             self._widget.label_experiment.setText('Recording...')
             self.time = time.time()
             self.start_record_data()
+
+
+    def _handle_record_video(self, checked):
+        pass
 
 
     def start_record_data(self):
