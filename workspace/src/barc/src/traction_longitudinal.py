@@ -28,19 +28,30 @@ from filtering import filteredSignal
 # Set up measure callbacks
 # imu measurement update
 # TODO
-(roll, pitch, yaw, a_x, a_y, a_z, w_x, w_y, w_z) = zeros(9)
-v_x = 0
-def imu_callback(data):
-	global roll, pitch, yaw, a_x, a_y, a_z, w_x, w_y, w_z
-	(roll, pitch, yaw, a_x, a_y, a_z, w_x, w_y, w_z) = data.value
 
+prev_time       = 0
+delta_time      = 0
+v_x             = 0
+speed           = 0
+a_x             = 0
+sleep_time      = 0.01
+
+N                   = rospy.get_param("longitudinal/N")
+Reff                = rospy.get_param("longitudinal/Reff")
+counts              = zeros(N)
+times               = zeros(N)
+Ww_Reff             = 0
+desired_slip_ratio  = 0.04
+
+def imu_callback(data):
+	global a_x, v_x, delta_time, prev_time
+	(_, _, _, a_x, _, _, _, _, _) = data.value
+    current_time    = data.timestamp
+    delta_time      = current_time - prev_time      # Get the time difference inbetween call backs
+    acc_filtered    = filter_acc_x(a_x)             # Uses low pass filter to filter raw accel data
+    v_x += acc_filtered *delta_time                 # Integrates accel to get velocity
 
 # encoder measurement update
-N       = rospy.get_param("longitudinal/N")
-Reff    = rospy.get_param("longitudinal/Reff")
-counts  = zeros(N)
-times   = zeros(N)
-Ww_Reff = 0
 def encoder_callback(data):
 	global counts
     counts = hstack(([data.FL],counts[1:]))
@@ -48,7 +59,6 @@ def encoder_callback(data):
     Ww = (counts[0] - counts[-1])/(times[0] - times[-1])
     Ww_Reff = Ww * pi/2 * Reff
 
-speed = 0
 def speed_callback(data):
     global speed
     speed = data.speed
@@ -83,13 +93,17 @@ def main_auto():
 
         # publish command signal 
         # TODO
-        motor_PWM   = 90
+        global v_x, Ww_Reff, desired_slip_ratio
+        slip_ratio      = (Ww_Reff -v_x) /Ww_Reff
+        err_slip_ratio  = slip_ratio -desired_slip_ratio
+        motor_PWM       = pid.update(err_slip_ratio)
+        # motor_PWM       = 90
 
         nh.publish(MOT(motor_PWM))
         log.publish(STATE(Vx, Ww_Reff, err))
 	
         # wait
-        rate.sleep()
+        rate.sleep(sleep_time)
 
 #############################################################
 if __name__ == '__main__':
