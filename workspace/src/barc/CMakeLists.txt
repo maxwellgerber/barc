@@ -53,6 +53,7 @@ add_message_files(
    MOT.msg
    SERV.msg
    SPEED.msg
+   STATE.msg
    Z_KinBkMdl.msg
 )
 

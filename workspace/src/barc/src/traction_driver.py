@@ -7,7 +7,7 @@ from math import pi,sin
 import time
 import serial
 from numpy import zeros, hstack, cos, array, dot, arctan
-from manuevers import StraightBrake
+from manuevers import TestSettings, StraightBrake
 
 def driver():
     pub = rospy.Publisher('speed', SPEED, queue_size=10)
