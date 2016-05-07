@@ -15,7 +15,7 @@
 
 import rospy
 from data_service.msg import TimeData
-from barc.msg import Encoder, MOT, STATE
+from barc.msg import Encoder, MOT, STATE, SPEED
 from math import pi,sin
 import time
 import serial
@@ -26,6 +26,7 @@ from pid import PID
 ###########################################################
 # Set up measure callbacks
 # imu measurement update
+# TODO
 (roll, pitch, yaw, a_x, a_y, a_z, w_x, w_y, w_z) = zeros(9)
 v_x = 0
 def imu_callback(data):
@@ -58,7 +59,7 @@ def main_auto():
     rospy.init_node('auto_mode', anonymous=True)
     rospy.Subscriber('imu', TimeData, imu_callback)
     rospy.Subscriber('encoder', Encoder, encoder_callback)
-    rospy.Subscriber('speed', Speed, speed_callback)
+    rospy.Subscriber('speed', SPEED, speed_callback)
     nh = rospy.Publisher('mot', MOT, queue_size = 10)
     log = rospy.Publisher('state', STATE, queue_size = 10)
 
@@ -75,6 +76,7 @@ def main_auto():
     while not rospy.is_shutdown():
 
         # publish command signal 
+        # TODO
         motor_PWM   = 90
 
         nh.publish(MOT(motor_PWM))

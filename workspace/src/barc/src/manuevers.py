@@ -93,6 +93,36 @@ def Straight(opt, rate, t_i):
 
     return (motorCMD, servoCMD)
 
+def StraightBrake(opt, rate, t_i):
+    # timing maneuvers
+    oneSec      = rate
+    dt          = (opt.dt_man)*oneSec
+    t_0         = opt.t_0*oneSec
+    t_f         = t_0 + dt
+    t_brake     = t_f + .7
+
+    # rest
+    if t_i < t_0:
+        servoCMD     = opt.Z_turn
+        motorCMD    = opt.neutral
+
+    # start moving
+    elif (t_i >= t_0) and (t_i < t_f):
+        servoCMD     = opt.Z_turn
+        motorCMD    = opt.speed
+
+    # brake to slow down
+    elif (t_i >= t_f) and (t_i < t_brake):
+        servoCMD     = opt.Z_turn
+        motorCMD    = opt.speed - 40
+        
+    # set straight and stop
+    else:
+        servoCMD        = opt.Z_turn
+        motorCMD        = opt.neutral
+
+    return (motorCMD, servoCMD)
+
 
 #############################################################
 def SingleTurn(opt, rate, t_i):

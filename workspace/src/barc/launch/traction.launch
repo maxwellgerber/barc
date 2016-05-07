@@ -12,24 +12,14 @@
 
    	<!-- DRIVER INPUT -->
 	<node pkg="barc" type="traction_driver.py" name="driver" output="screen">
-         <!--  SELECTION -->
-		<param name="control_sel" type="int" value="1" />
-
          <!-- PROPERTIES -->
-        <param name="v_x_pwm" type="int" value="96" />
-		<param name="steering_angle" type="int" value="5" />
+        <param name="speed" type="int" value="140" />
 		<param name="t_exp" type="int" value="6" />
         <param name="t_0" type="int" value="2" />
     </node>
 
 	<!-- LATERAL CONTROL -->
 	<node pkg="barc" type="traction_lateral.py" name="lateral" output="screen">
-
-         <!-- PROPERTIES -->
-        <param name="v_x_pwm" type="int" value="96" />
-		<param name="steering_angle" type="int" value="5" />
-		<param name="t_exp" type="int" value="6" />
-        <param name="t_0" type="int" value="2" />
 		
         <!-- PID for straight test using imu gyro -->
         <param name="p" type="double" value="17" />
@@ -42,14 +32,12 @@
 	<node pkg="barc" type="traction_longitudinal.py" name="longitudinal" output="screen">
 
          <!-- PROPERTIES -->
-        <param name="v_x_pwm" type="int" value="96" />
-		<param name="steering_angle" type="int" value="5" />
-		<param name="t_exp" type="int" value="6" />
-        <param name="t_0" type="int" value="2" />
+        <param name="N" type="int" value="5" />
+		<param name="Reff" type="double" value="1.3928" />
 		
         <!-- PID for straight test using imu gyro -->
-        <param name="p" type="double" value="40" />
-		<param name="i" type="double" value="5" />
+        <param name="p" type="double" value="12" />
+		<param name="i" type="double" value="2" />
 		<param name="d" type="double" value="0" />
         
     </node>
