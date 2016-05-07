@@ -22,6 +22,7 @@ import serial
 from numpy import zeros, hstack, cos, array, dot, arctan
 from input_map import angle_2_servo, servo_2_angle
 from pid import PID
+from filtering import filteredSignal
 
 ###########################################################
 # Set up measure callbacks
@@ -52,6 +53,11 @@ def speed_callback(data):
     global speed
     speed = data.speed
 
+def filter_acc_x(acc_raw):
+    y0 = 0; a = 0.5; n = 200; method = 'lp'
+    filter_obj = filteredSignal(y0=y0, a=a, n=n, method='lp')
+    filter_obj.update(a_x)
+    return filter_obj.getFilteredSignal()
 #############################################################
 # main code
 def main_auto():
