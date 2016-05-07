@@ -41,7 +41,7 @@ counts  = zeros(N)
 times   = zeros(N)
 Ww_Reff = 0
 def encoder_callback(data):
-	global counts
+    global counts
     counts = hstack(([data.FL],counts[1:]))
     times = hstack(([rospy.get_rostime()], times[1:]))
     Ww = (counts[0] - counts[-1])/(times[0] - times[-1])

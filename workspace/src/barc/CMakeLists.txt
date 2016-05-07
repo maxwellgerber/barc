@@ -52,6 +52,7 @@ add_message_files(
    ECU.msg
    MOT.msg
    SERV.msg
+   SPEED.msg
    Z_KinBkMdl.msg
 )
 
