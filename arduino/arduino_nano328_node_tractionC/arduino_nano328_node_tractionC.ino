@@ -23,7 +23,8 @@ WARNING:
 #include <ros.h>
 #include <barc/Ultrasound.h>
 #include <barc/Encoder.h>
-#include <barc/ECU.h>
+#include <barc/MOT.h>
+#include <barc/SERV.h>
 #include <Servo.h>
 #include "Maxbotix.h"
 
@@ -67,7 +68,8 @@ ros::NodeHandle nh;
 // define global message variables
 // Encoder, Electronic Control Unit, Ultrasound
 barc::Ultrasound ultrasound;
-barc::ECU ecu;
+barc::MOT mot;
+barc::SERV serv;
 barc::Encoder encoder;
 
 ros::Publisher pub_encoder("encoder", &encoder);
@@ -75,19 +77,28 @@ ros::Publisher pub_ultrasound("ultrasound", &ultrasound);
 
 
 /**************************************************************************
-ESC COMMAND {MOTOR, SERVO} CALLBACK
+MOT COMMAND CALLBACK
 **************************************************************************/
-void messageCb(const barc::ECU& ecu){
-  // deconstruct esc message
-  motorCMD = saturateMotor( int(ecu.motor_pwm) );
-  servoCMD = saturateServo( int(ecu.servo_pwm) );
-
+void messageCbMOT(const barc::MOT& mot){
+  // deconstruct message
+  motorCMD = saturateMotor( int(mot.motor_pwm) );
   // apply commands to motor and servo
   motor.write( motorCMD );
+}
+// ECU := Engine Control Unit
+ros::Subscriber<barc::MOT> s("mot", messageCbMOT);
+
+/**************************************************************************
+SERV COMMAND CALLBACK
+**************************************************************************/
+void messageCbSERV(const barc::SERV& serv){
+  // deconstruct message
+  servoCMD = saturateServo( int(serv.servo_pwm) );
+  // apply commands to motor and servo
   steering.write(  servoCMD );
 }
 // ECU := Engine Control Unit
-ros::Subscriber<barc::ECU> s("ecu", messageCb);
+ros::Subscriber<barc::SERV> t("serv", messageCbSERV);
 
 // Set up ultrasound sensors
 /*
@@ -119,6 +130,7 @@ void setup()
   nh.advertise(pub_ultrasound);
   nh.advertise(pub_encoder);
   nh.subscribe(s);
+  nh.subscribe(t);
 
   // Arming ESC, 1 sec delay for arming and ROS
   motor.write(theta_center);

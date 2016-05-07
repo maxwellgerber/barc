@@ -1,0 +1,61 @@
+<launch>
+	<!-- IMU NODE -->
+	<node pkg="barc" type="imu_data_acquisition.py" name="imu_node" >
+		<param name="port" value="/dev/ttyACM0" />
+	</node>
+
+	<!-- ARDUINO NODE -->
+    <!--  * encoders and ultrasound sensors -->
+	<node pkg="rosserial_python" type="serial_node.py" name="arduino_node" >
+		<param name="port" value="/dev/ttyUSB0" />
+	</node>
+
+   	<!-- DRIVER INPUT -->
+	<node pkg="barc" type="traction_driver.py" name="driver" output="screen">
+         <!--  SELECTION -->
+		<param name="control_sel" type="int" value="1" />
+
+         <!-- PROPERTIES -->
+        <param name="v_x_pwm" type="int" value="96" />
+		<param name="steering_angle" type="int" value="5" />
+		<param name="t_exp" type="int" value="6" />
+        <param name="t_0" type="int" value="2" />
+    </node>
+
+	<!-- LATERAL CONTROL -->
+	<node pkg="barc" type="traction_lateral.py" name="lateral" output="screen">
+
+         <!-- PROPERTIES -->
+        <param name="v_x_pwm" type="int" value="96" />
+		<param name="steering_angle" type="int" value="5" />
+		<param name="t_exp" type="int" value="6" />
+        <param name="t_0" type="int" value="2" />
+		
+        <!-- PID for straight test using imu gyro -->
+        <param name="p" type="double" value="17" />
+		<param name="i" type="double" value="1.3" />
+		<param name="d" type="double" value="0" />
+        
+    </node>
+
+   	<!-- LONGITUDINAL CONTROL  -->
+	<node pkg="barc" type="traction_longitudinal.py" name="longitudinal" output="screen">
+
+         <!-- PROPERTIES -->
+        <param name="v_x_pwm" type="int" value="96" />
+		<param name="steering_angle" type="int" value="5" />
+		<param name="t_exp" type="int" value="6" />
+        <param name="t_0" type="int" value="2" />
+		
+        <!-- PID for straight test using imu gyro -->
+        <param name="p" type="double" value="40" />
+		<param name="i" type="double" value="5" />
+		<param name="d" type="double" value="0" />
+        
+    </node>
+
+    <!-- Record the experiment data -->
+    <node pkg="rosbag" type="record" name="rosbag_record"
+        args=" --all" />
+
+</launch>
