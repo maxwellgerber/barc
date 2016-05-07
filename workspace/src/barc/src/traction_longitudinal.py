@@ -44,8 +44,8 @@ Ww_Reff             = 0
 desired_slip_ratio  = 0.04
 
 def imu_callback(data):
-	global a_x, v_x, delta_time, prev_time
-	(_, _, _, a_x, _, _, _, _, _) = data.value
+    global a_x, v_x, delta_time, prev_time
+    (_, _, _, a_x, _, _, _, _, _) = data.value
     current_time    = data.timestamp
     delta_time      = current_time - prev_time      # Get the time difference inbetween call backs
     acc_filtered    = filter_acc_x(a_x)             # Uses low pass filter to filter raw accel data
