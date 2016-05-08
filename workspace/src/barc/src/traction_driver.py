@@ -27,7 +27,7 @@ def driver():
 
     while not rospy.is_shutdown():
         (motorCMD, _) = StraightBrake(opt, rateHz, t_i)
-        pub.publish(SPEED(speed))
+        pub.publish(SPEED(motorCMD))
         rate.sleep()
         t_i +=1
 

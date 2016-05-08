@@ -31,7 +31,7 @@ class TestSettings:
         self.turn_deg   = turn
 
 		# check valid speed
-        if SPD < 90 or SPD > 130:
+        if SPD < 90 or SPD > 180:
             self.speed = 95
 
 		# check valid turns

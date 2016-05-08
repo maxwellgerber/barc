@@ -14,6 +14,7 @@
 # ---------------------------------------------------------------------------
 
 import rospy
+import time
 from data_service.msg import TimeData
 from barc.msg import Encoder, MOT, STATE, SPEED
 from math import pi,sin
@@ -48,14 +49,16 @@ def imu_callback(data):
     (_, _, _, a_x, _, _, _, _, _) = data.value
     current_time    = data.timestamp
     delta_time      = current_time - prev_time      # Get the time difference inbetween call backs
+    if(prev_time <= 0): delta_time = 0
     acc_filtered    = filter_acc_x(a_x)             # Uses low pass filter to filter raw accel data
     v_x += acc_filtered *delta_time                 # Integrates accel to get velocity
+    prev_time = current_time
 
 # encoder measurement update
 def encoder_callback(data):
-    global counts
-    counts = hstack(([data.FL],counts[1:]))
-    times = hstack(([rospy.get_rostime()], times[1:]))
+    global counts, times, Ww_Reff
+    counts = hstack(([data.FR],counts[:-1]))
+    times = hstack(([time.time()], times[:-1]))
     Ww = (counts[0] - counts[-1])/(times[0] - times[-1])
     Ww_Reff = Ww * pi/2 * Reff
 
@@ -86,28 +89,35 @@ def main_auto():
     p       = rospy.get_param("longitudinal/p")
     i       = rospy.get_param("longitudinal/i")
     d       = rospy.get_param("longitudinal/d")
-    pid     = PID(P=1, I=1, D=0)
+    pid     = PID(P=p, I=i, D=d)
 
     # main loop
     while not rospy.is_shutdown():
 
         # publish command signal 
         # TODO
-        global v_x, Ww_Reff, desired_slip_ratio
-        slip_ratio      = (Ww_Reff -v_x) /Ww_Reff
-        err_slip_ratio  = slip_ratio -desired_slip_ratio
-        motor_PWM       = pid.update(err_slip_ratio)
-        # motor_PWM       = 90
+        global v_x, Ww_Reff, desired_slip_ratio, delta_time, speed
 
+	if Ww_Reff <= 0.001: 
+		motor_PWM = speed
+		print(motor_PWM )
+	        nh.publish(MOT(motor_PWM))
+		continue
+
+        slip_ratio      		= (Ww_Reff -v_x) /Ww_Reff
+        err_slip_ratio  	= slip_ratio -desired_slip_ratio
+        updated_err      	= pid.update(err_slip_ratio, delta_time)
+	motor_PWM 		= max(90, motor_PWM + updated_err)
+	print(str(motor_PWM) + '  ' + str(updated_err))
         nh.publish(MOT(motor_PWM))
-        log.publish(STATE(Vx, Ww_Reff, err))
+        log.publish(STATE(v_x, Ww_Reff, err_slip_ratio))
 	
         # wait
-        rate.sleep(sleep_time)
+        rate.sleep()
 
 #############################################################
 if __name__ == '__main__':
 	try:
 		main_auto()
-	except rospy.ROSInterruptException:
-		pass
+    	except rospy.ROSInterruptException:
+        	pass
