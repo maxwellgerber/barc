@@ -99,7 +99,7 @@ def StraightBrake(opt, rate, t_i):
     dt          = (opt.dt_man)*oneSec
     t_0         = opt.t_0*oneSec
     t_f         = t_0 + dt
-    t_brake     = t_f + .7
+    t_brake     = t_f + 1.5
 
     # rest
     if t_i < t_0:

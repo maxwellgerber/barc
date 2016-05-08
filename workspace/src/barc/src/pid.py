@@ -63,6 +63,9 @@ class PID:
 
     def getError(self):
         return self.e
+
+    def reset(self):
+        self.e_int = 0
   
 #%% Example function
 def fx(x, u, dt):

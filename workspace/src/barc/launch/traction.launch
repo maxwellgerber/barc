@@ -34,6 +34,7 @@
          <!-- PROPERTIES -->
         <param name="N" type="int" value="5" />
 		<param name="Reff" type="double" value="1.3928" />
+		<param name="threshold" type="double" value="0.1" />
 		
         <!-- PID for straight test using imu gyro -->
         <param name="p" type="double" value="1" />

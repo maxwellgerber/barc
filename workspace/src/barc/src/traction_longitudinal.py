@@ -39,19 +39,21 @@ sleep_time      = 0.01
 
 N                   = rospy.get_param("longitudinal/N")
 Reff                = rospy.get_param("longitudinal/Reff")
+threshold           = rospy.get_param("longitudinal/threshold")
 counts              = zeros(N)
 times               = zeros(N)
 Ww_Reff             = 0
 desired_slip_ratio  = 0.04
+filter_obj = filteredSignal(y0=0, a=0.5, n=200, method='lp')
 
 def imu_callback(data):
-    global a_x, v_x, delta_time, prev_time
+    global a_x, v_x, delta_time, prev_time, filter_obj
     (_, _, _, a_x, _, _, _, _, _) = data.value
     current_time    = data.timestamp
     delta_time      = current_time - prev_time      # Get the time difference inbetween call backs
     if(prev_time <= 0): delta_time = 0
-    acc_filtered    = filter_acc_x(a_x)             # Uses low pass filter to filter raw accel data
-    v_x += acc_filtered *delta_time                 # Integrates accel to get velocity
+    acc_filtered    = filter_acc_x(a_x, filter_obj)             # Uses low pass filter to filter raw accel data
+    v_x += acc_filtered * delta_time                 # Integrates accel to get velocity
     prev_time = current_time
 
 # encoder measurement update
@@ -66,9 +68,7 @@ def speed_callback(data):
     global speed
     speed = data.speed
 
-def filter_acc_x(acc_raw):
-    y0 = 0; a = 0.5; n = 200; method = 'lp'
-    filter_obj = filteredSignal(y0=y0, a=a, n=n, method='lp')
+def filter_acc_x(acc_raw, filter_obj):
     filter_obj.update(a_x)
     return filter_obj.getFilteredSignal()
 #############################################################
@@ -93,24 +93,20 @@ def main_auto():
 
     # main loop
     while not rospy.is_shutdown():
-
-        # publish command signal 
-        # TODO
         global v_x, Ww_Reff, desired_slip_ratio, delta_time, speed
+        slip_ratio  = (Ww_Reff -v_x) /Ww_Reff
+        err         = slip_ratio - desired_slip_ratio
+        u = 90 + pid.update(err, dt)
 
-	if Ww_Reff <= 0.001: 
-		motor_PWM = speed
-		print(motor_PWM )
-	        nh.publish(MOT(motor_PWM))
-		continue
+        if err > threshold:
+            motor_PWM = max(min(speed, u), 90)
+        else:
+            pid.reset()
+            motor_PWM = speed
 
-        slip_ratio      		= (Ww_Reff -v_x) /Ww_Reff
-        err_slip_ratio  	= slip_ratio -desired_slip_ratio
-        updated_err      	= pid.update(err_slip_ratio, delta_time)
-	motor_PWM 		= max(90, motor_PWM + updated_err)
-	print(str(motor_PWM) + '  ' + str(updated_err))
+        # publish data
         nh.publish(MOT(motor_PWM))
-        log.publish(STATE(v_x, Ww_Reff, err_slip_ratio))
+        log.publish(STATE(v_x, Ww_Reff, err))
 	
         # wait
         rate.sleep()
@@ -119,5 +115,5 @@ def main_auto():
 if __name__ == '__main__':
 	try:
 		main_auto()
-    	except rospy.ROSInterruptException:
-        	pass
+	except rospy.ROSInterruptException:
+    	pass
